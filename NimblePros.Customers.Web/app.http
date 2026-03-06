@@ -1,0 +1,36 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+@hostname = localhost
+@port = 5229
+@host = {{hostname}}:{{port}}
+
+
+GET http://{{host}}/customers
+Accept: application/json
+
+###
+
+GET http://{{host}}/customers/5ead8250-1439-4c1b-8ae1-0fe68ee18fbf
+Accept: application/json
+
+###
+
+POST http://{{host}}/customers
+Accept: application/json
+Content-Type: application/json
+{
+  "companyName": "New Customer"
+}
+
+###
+
+PUT http://{{host}}/customers/cd593e93-17cc-4ef6-af7c-3c97f5b28b83
+Accept: application/json
+Content-Type: application/json
+{
+  "companyName": "Updated Name"
+}
+
+###
+
+DELETE http://{{host}}/customers/32579407-9f37-4e6b-b9f0-5c94cd51be43
+Accept: application/json

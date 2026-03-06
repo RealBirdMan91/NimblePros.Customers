@@ -18,24 +18,25 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+RouteGroupBuilder _customerGroup = app.MapGroup("/customers")
+    .WithOpenApi();
 
-app.MapGet("/customers", async (CustomerData data) =>
+
+_customerGroup.MapGet("/", async (CustomerData data) =>
 {
     var customers = await data.ListAsync();
     return TypedResults.Ok(customers);
 })
-.WithName("ListCustomers")
-.WithOpenApi();
+.WithName("ListCustomers");
 
-app.MapGet("/customers/{id:guid}", async (Guid id, CustomerData data) =>
+_customerGroup.MapGet("/{id:guid}", async (Guid id, CustomerData data) =>
     await data.GetByIdAsync(id) is Customer customer
         ? TypedResults.Ok(customer)
         : Results.NotFound()
 )
-.WithName("GetCustomerById")
-.WithOpenApi();
+.WithName("GetCustomerById");
 
-app.MapPost("/customers", async (Customer customer, CustomerData data) =>
+_customerGroup.MapPost("/", async (Customer customer, CustomerData data) =>
 {
     var newCustomer = customer with { Id = Guid.NewGuid(), Projects = new List<Project>() };
 
@@ -43,16 +44,15 @@ app.MapPost("/customers", async (Customer customer, CustomerData data) =>
     return Results.Created($"/customers/{newCustomer.Id}", newCustomer);
 })
 .AddEndpointFilter<ValidateCustomer>()
-.WithName("AddCustomer")
-.WithOpenApi();
+.WithName("AddCustomer");
 
 
 
-app.MapPut("/customers/{id:guid}", async ([AsParameters] PutRequest request) =>
+_customerGroup.MapPut("/{id:guid}", async ([AsParameters] PutRequest request) =>
 {
     Customer? existingCustomer = await request.Data.GetByIdAsync(request.Id);
-   
-    if(existingCustomer is null) return Results.NotFound();
+
+    if (existingCustomer is null) return Results.NotFound();
 
 
     Customer updatedCustomer = existingCustomer with
@@ -66,18 +66,16 @@ app.MapPut("/customers/{id:guid}", async ([AsParameters] PutRequest request) =>
 })
 //.AddEndpointFilter<ValidateCustomer>()
 .WithParameterValidation()
-.WithName("UpdateCustomer")
-.WithOpenApi();
+.WithName("UpdateCustomer");
 
-app.MapDelete("/customers/{id:guid}", async (Guid id,  CustomerData data) =>
+_customerGroup.MapDelete("/{id:guid}", async (Guid id, CustomerData data) =>
 {
     if (await data.GetByIdAsync(id) is null) return Results.NotFound();
     await data.DeleteAsync(id);
     return Results.NoContent();
 
 })
-.WithName("DeleteCustomer")
-.WithOpenApi();
+.WithName("DeleteCustomer");
 
 
 app.Run();
